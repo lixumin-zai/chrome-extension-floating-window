@@ -1,0 +1,19 @@
+#draggable-popup {
+  position: fixed;
+  top: 100px;
+  left: 100px;
+  width: 300px;
+  padding: 10px;
+  background-color: black;
+  border: 2px solid black;
+  z-index: 99999; /* 确保 z-index 非常高 */
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+#popup-header {
+  background-color: #f51b1b;
+  padding: 10px;
+  cursor: move;
+  text-align: center;
+  font-weight: bold;
+}
