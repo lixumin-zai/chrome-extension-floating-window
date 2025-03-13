@@ -28,6 +28,9 @@ function togglePopup() {
     if (event.metaKey && event.key === '.') {
       if (popup.style.display === 'none') {
         popup.style.display = 'block';  // 显示弹窗
+        const inputElement = document.getElementById('content-input');
+        // 调用 focus() 方法将焦点聚焦到输入框
+        inputElement.focus();
       } else {
         popup.style.display = 'none';  // 隐藏弹窗
       }
@@ -43,9 +46,8 @@ function togglePopup() {
       <div id="drag-header-bottom"></div>
       <div id="drag-header-left"></div>
       <div id="drag-header-right"></div>
-      <div>
+      <div class="input-container">
         <input type="text" id="content-input" placeholder="Enter content" />
-        <button id="stream-btn">Send</button>
       </div>
       <div id="stream-output" style="color: black;white-space: pre-wrap;"></div>
       <div class="resize-handle" id="resize-br"></div>
@@ -53,7 +55,6 @@ function togglePopup() {
       <div class="resize-handle" id="resize-tr"></div>
       <div class="resize-handle" id="resize-tl"></div>
     `;
-    // <iframe scr="http://82.156.3.170:10002" width="100%" height="100%"></iframe>
 
     // 设置样式
     popup.style.display = 'none';  // 隐藏弹窗
@@ -61,7 +62,7 @@ function togglePopup() {
     popup.style.zIndex = '2147483645'; // 最大 z-index
     popup.style.top = '100px';
     popup.style.left = '100px';
-    popup.style.width = '300px';
+    popup.style.width = '500px';
     popup.style.height = '200px'; // 初始高度
     popup.style.padding = '10px';
     popup.style.backgroundColor = 'white';
@@ -70,7 +71,46 @@ function togglePopup() {
     popup.style.overflow = 'auto'; // 允许内容溢出时滚动
   
     document.body.appendChild(popup);
-  
+
+    const style = document.createElement('style');
+    style.textContent = `
+      /* 总容器样式 */
+      .input-container {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          width: 100%;
+          max-width: 800px;
+          margin: 10px auto;
+          padding: 0 15px;
+      }
+
+      /* 输入框样式 */
+      #content-input {
+          flex: 1;
+          padding: 5px 5px;
+          font-size: 16px;
+          border: 1px solid #dcdfe6;
+          border-radius: 8px;
+          transition: all 0.3s ease;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+          color: white; /* 设置字体颜色为白色 */
+          background-color: black; /* 设置背景颜色为黑色 */
+      }
+
+      /* 输入框聚焦效果 */
+      #content-input:focus {
+          border-color: #409eff;
+          box-shadow: 0 0 8px rgba(64, 158, 255, 0.3);
+          outline: none;
+      }
+
+      /* 输入框占位符样式 */
+      #content-input::placeholder {
+          color: #909399;
+      }
+    `;
+    document.head.appendChild(style);
     // 添加拖动功能
     let isDragging = false;
     let offsetX, offsetY;
@@ -170,7 +210,7 @@ function togglePopup() {
         }
       };
 
-      document.onmouseup = () => {
+    document.onmouseup = () => {
         isResizing = false;
         document.onmousemove = null; // 清除事件处理程序
       };
@@ -194,24 +234,40 @@ function togglePopup() {
     });
 
 
-    const streamBtn = document.getElementById('stream-btn');
+    // const streamBtn = document.getElementById('stream-btn');
     const contentInput = document.getElementById('content-input');
     const streamOutput = document.getElementById('stream-output');
+    // let script = document.createElement('script');
+    // script.src = "https://cdn.jsdelivr.net/npm/mathpix-markdown-it@2.0.4/es5/bundle.js";
+    // document.head.append(script);
+
     // 点击按钮时执行 streamRequest 函数
-    streamBtn.addEventListener('click', () => {
-        const content = contentInput.value;
-        if (content) {
-            streamRequest(content);
-        }
+    // streamBtn.addEventListener('click', () => {
+    //     const content = contentInput.value;
+    //     if (content) {
+    //         streamRequest(content);
+    //     }
+    // });
+
+    contentInput.addEventListener('keydown', function(event) {
+      if (event.key === 'Enter') {
+        // 回车键被按下时触发的操作
+        const inputValue = event.target.value;
+        console.log(inputValue)
+        console.log(event.target.value)
+        console.log(contentInput.value)
+        if (inputValue) {
+          streamRequest(inputValue);
+        } 
+      }
     });
   
     async function streamRequest(content) {
-      const url = "http://82.156.3.170:10002/chat";
-      // const url = chrome.runtime.getURL("                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               ");
+      const url = "https://lismin.online:10002/chat";
+      // const url = chrome.runtime.getURL(" 
       const data = {
-          content: "reciprocate, moribund, telegraph, episodic, trespass"
+          content: content
       };
-      console.log(JSON.stringify(data))
       streamOutput.innerHTML = ''; // 清空之前的输出内容
       // 发起 POST 请求
       const response = await fetch(url, {
@@ -222,11 +278,8 @@ function togglePopup() {
         body: JSON.stringify(data)
       });
       console.log(JSON.stringify(data))
-      // 处理响应流
-      // let script = document.createElement('script');
-      // script.src = "https://cdn.jsdelivr.net/npm/mathpix-markdown-it@1.3.6/es5/bundle.js";
-      // document.head.append(script);
 
+      
       const reader = response.body.getReader();
       const decoder = new TextDecoder("utf-8"); // 创建一个文本解码器
       let buffer = ""; // 缓存不完整的字符
