@@ -22,7 +22,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 function togglePopup() {
   console.log("lixumin")
   let popup = document.getElementById('draggable-popup');
-
+  let isStopped = false;
   document.addEventListener('keydown', (event) => {
     
     if (event.metaKey && event.key === '.') {
@@ -31,8 +31,10 @@ function togglePopup() {
         const inputElement = document.getElementById('content-input');
         // 调用 focus() 方法将焦点聚焦到输入框
         inputElement.focus();
+        myFunctionWithStop();
       } else {
         popup.style.display = 'none';  // 隐藏弹窗
+        isStopped = true
       }
     }
   });
@@ -49,6 +51,7 @@ function togglePopup() {
       <div class="input-container">
         <input type="text" id="content-input" placeholder="Enter content" />
       </div>
+      <ul id="show-data" style="color: black;"></ul>
       <div id="stream-output" style="color: black;white-space: pre-wrap;"></div>
       <div class="resize-handle" id="resize-br"></div>
       <div class="resize-handle" id="resize-bl"></div>
@@ -262,6 +265,43 @@ function togglePopup() {
       }
     });
   
+
+    async function test() {
+      // chrome://flags/
+      const url = "https://lismin.online:10002/";
+      // const url = chrome.runtime.getURL(" 
+      streamOutput.innerHTML = ''; // 清空之前的输出内容
+      // 发起 POST 请求
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+      });
+      const data = await response.json();
+
+      const dataList = document.getElementById('show-data');
+      dataList.innerHTML = ''
+      data.data.forEach((info)=>{
+        const listItem = document.createElement('li');
+        listItem.textContent = `名称: ${info.name}, 状态: ${info.status}, 销量: ${info.sell}`;
+        dataList.appendChild(listItem);
+      })
+    }
+    // 如果需要在某个时刻停止调用，可以设置一个标志变量
+    
+    async function myFunctionWithStop() {
+        if (isStopped) return;
+        console.log('函数被调用了');
+        test()
+        await new Promise(test => setTimeout(test, 2000));
+        await myFunctionWithStop();
+    }
+
+    // 启动函数调用
+    myFunctionWithStop();
+
+
     async function streamRequest(content) {
       const url = "https://lismin.online:10002/chat";
       // const url = chrome.runtime.getURL(" 
